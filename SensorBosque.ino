@@ -11,10 +11,10 @@ SDS011 my_sds;
 #define MQ135Pin 12
 int GasLevelMQ135;
 /*-----MQ7----------*/
-//#define MQ7Pin 34
+#define MQ7Pin 34
 int CO;
 /*----KY038---------*/
-//#define KY038Pin 4
+#define KY038Pin 4
 float soundDB;
 int soundAnalog;
 int soundValue;
