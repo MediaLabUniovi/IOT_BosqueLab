@@ -1,7 +1,7 @@
 Proyecto para deteccion de incendios tanto en exteriores como interiores desarollado por el MediaLab. 
 Objetivos de este proyecto: 
 * Deteccion de gases producidos por el fuego: Carbonos (CO2, CO) Nitrogenos(NOx) Sulfuros (SOx) [MQ135 y MQ7]
-* Deteccion de contaminacion acustica: Sensor (Microfono) para medir decibelios
+* Deteccion de contaminacion acustica: Sensor (Microfono) para medir decibelios [KY038]
 * Deteccion de temperatura y humedad [BME280]
 * Deteccion de particulas en suspension PM10 y PM2.5 [SDS011]
 
