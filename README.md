@@ -15,5 +15,6 @@ ACCESO A TTN: https://eu1.cloud.thethings.network/console/applications/sensor-in
 ACCESO BALENA: https://dashboard.balena-cloud.com/login
 
 GRAFANA: http://4f566df1fed52c6e7fd5f661f64ae3eb.balena-devices.com:8080/d/LeuF06mRz/sensor-incendios?orgId=1&from=now-3h&to=now
+![Captura de pantalla 2024-06-11 141137](https://github.com/MediaLabUniovi/bosquelab/assets/159242374/61ab85da-4e60-4625-80cc-37ca0b33e662)
 
-![incendios](https://github.com/MediaLabUniovi/bosquelab/assets/159242374/b6bb0664-3aca-4ea0-b097-660a4a702bfe)
+
