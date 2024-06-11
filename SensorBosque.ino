@@ -1,26 +1,43 @@
 /*-------------DECLARACION DE LIBRERIAS Y VARIABLES--------------------*/
+
 /*---SDS011--------*/
+
 #include "SDS011.h"
 int sensorData;
 float p10, p25;
 int error;
 SDS011 my_sds;
-#define RX_PIN 13
-#define TX_PIN 15
+#define RX_PIN 15
+#define TX_PIN 13
+
 /*-----MQ135--------*/
-#define MQ135Pin 12
-int GasLevelMQ135;
+
+#include <MQUnifiedsensor.h>
+//Definitions
+#define         Board                   ("ESP-32") // Wemos ESP-32 or other board, whatever have ESP32 core.
+#define         Pin                     (36)  //IO25 for your ESP32 WeMos Board, pinout here: https://i.pinimg.com/originals/66/9a/61/669a618d9435c702f4b67e12c40a11b8.jpg
+/***********************Software Related Macros************************************/
+#define         Type                    ("MQ-135") //MQ3 or other MQ Sensor, if change this verify your a and b values.
+#define         Voltage_Resolution      (5) // 
+#define         ADC_Bit_Resolution      (12) // ESP-32 bit resolution. Source: https://randomnerdtutorials.com/esp32-adc-analog-read-arduino-ide/
+#define         RatioMQ135CleanAir       (3.6) // Ratio of your sensor, for this example an MQ-3
+/*****************************Globals***********************************************/
+MQUnifiedsensor MQ135(Board, Voltage_Resolution, ADC_Bit_Resolution, Pin, Type);
+
 /*-----MQ7----------*/
-#define MQ7Pin 34
-int CO;
-/*----KY038---------*/
-#define KY038Pin 4
-float soundDB;
-int soundAnalog;
-int soundValue;
-#define DIGITAL_PIN 2
+
+#include "MQ7.h"
+#define A_PIN 34
+#define VOLTAGE 5
+// init MQ7 device
+MQ7 mq7(A_PIN, VOLTAGE);
+
 /*-----------Transistor-------------*/
-#define PowerPin   14
+
+#define PowerPin   2
+
+/*---------BATERIA------------------*/
+#define BatteryPin 14
 /*-------Librerias BME-------*/
 
 #include <Adafruit_Sensor.h>
@@ -28,25 +45,41 @@ int soundValue;
 #include <Wire.h>
 Adafruit_BME280 bme;
 #define SEALEVELPRESSURE_HPA (1013.25)
+
+/*-----------SCD30-----------------*/
+
+#include <Adafruit_SCD30.h>
+Adafruit_SCD30  scd30;
+
 /*---------LORA-------------------*/
+
 #include <lmic.h>
 #include <hal/hal.h>
-#define     TX_BUFFER_SIZE        20     //El paquete que se manda es de X bytes
+#define     TX_BUFFER_SIZE        21     //El paquete que se manda es de X bytes
 static uint8_t txBuffer[TX_BUFFER_SIZE]; 
+
 /*----------SLEEP--------------------*/
+
 #include <esp_sleep.h>
-#define     WAKE_TIME             30000 
+#define     WAKE_TIME             10000 
+
 /*------CREDENCIALES TTN--------------*/
 //Se introducen las credenciales del  dispostivo registrado en The Things Network 
-static const u1_t PROGMEM APPEUI[8]={0xXX, 0xXX, 0xXX, 0xXX, 0xXX, 0xXX, 0xXX, 0xXX};
+
+static const u1_t PROGMEM APPEUI[8]={0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 void os_getArtEui (u1_t* buf) { memcpy_P(buf, APPEUI, 8);}
 
-static const u1_t PROGMEM DEVEUI[8]={0xXX, 0xXX, 0xXX, 0xXX, 0xXX, 0xXX, 0xXX, 0xXX};
+/*----------------LSB----------------------*/
+static const u1_t PROGMEM DEVEUI[8]={0x59, 0x7C, 0x06, 0xD0, 0x7E, 0xD5, 0xB3, 0x70};
 void os_getDevEui (u1_t* buf) { memcpy_P(buf, DEVEUI, 8);}
 
-static const u1_t PROGMEM APPKEY[16] = {0xXX, 0xXX, 0xXX, 0xXX, 0xXX, 0xXX, 0xXX, 0xXX, 0xXX, 0xXX, 0xXX, 0xXX, 0xXX, 0xXX, 0xXX, 0xXX};
+/*-----------------MSB*---------------------*/
+
+static const u1_t PROGMEM APPKEY[16] = {0xF0, 0x39, 0xDA, 0xB0, 0x2F, 0x42, 0x84, 0xF6, 0xC8, 0xA7, 0x55, 0x68, 0x92, 0x6C, 0xFD, 0xD0};
 void os_getDevKey (u1_t* buf) {  memcpy_P(buf, APPKEY, 16);}
+
 /*------------PINES LORA Lilygo Lora 32-----------------------*/
+
 const lmic_pinmap lmic_pins = {           //Pines utilizamos para la el modulo LoRa
     .nss = 18, 
     .rxtx = LMIC_UNUSED_PIN,
@@ -81,13 +114,15 @@ void doSensor(uint8_t txBuffer[]) {
   txBuffer[8] = byte(shifthumedad);
   txBuffer[9] = shifthumedad >> 8;
 
-  int MQ135 = MQ135Value();
-  txBuffer[10] = byte(MQ135);
-  txBuffer[11] = MQ135 >> 8;
+  float MQ135 = MQ135Value();
+  int shiftMQ135 = int(MQ135*100);
+  txBuffer[10] = byte(shiftMQ135);
+  txBuffer[11] = shiftMQ135 >> 8;
   
-  int CO = COValue();
-  txBuffer[12] = byte(CO);
-  txBuffer[13] = CO >> 8;
+  float CO = COValue();
+  int shiftCO = int(CO*100);
+  txBuffer[12] = byte(shiftCO);
+  txBuffer[13] = shiftCO >> 8;
 
   PMS();
   int PM25 = p25*100;
@@ -98,7 +133,11 @@ void doSensor(uint8_t txBuffer[]) {
   txBuffer[16] = byte(PM10);
   txBuffer[17] = PM10 >> 8;
   
-
+  float bat = ReadBattery();
+  int shiftbat = int(bat*100);
+  txBuffer[18] = byte(shiftbat);
+  txBuffer[19] = shiftbat >> 8;
+  
 }
 
 void sleep_millis(uint64_t ms) {
@@ -295,18 +334,19 @@ void do_send(){
     }
     // Siguiente transimision programada despues del evento TX_COMPLETE
 }
-int MQ135Value() {
-  GasLevelMQ135 = analogRead(MQ135Pin);       
-  Serial.print("Air Quality:");
-  Serial.print(GasLevelMQ135, DEC);               
-  Serial.println("PPM");
-  return GasLevelMQ135;
+float MQ135Value() {
+  MQ135.update(); // Update data, the arduino will read the voltage from the analog pin
+  MQ135.readSensor(); // Sensor will read PPM concentration using the model, a and b values set previously or from the setup
+  Serial.print("CO2 PPM = "); Serial.println(MQ135.getPPM());
+	Serial.println(""); 	// blank new line
+
+  return MQ135.getPPM();
 }
-int COValue (){
-  int CO = analogRead(MQ7Pin);
-  Serial.print("CO value: ");
-	Serial.println(CO);//prints the CO value
-  return CO;
+float COValue (){
+  Serial.print("CO PPM = "); Serial.println(mq7.readPpm());
+	Serial.println(""); 	// blank new line
+	delay(1000);
+  return mq7.readPpm();
 }
 void PMS (){
   error = my_sds.read(&p25, &p10);
@@ -315,6 +355,39 @@ void PMS (){
     Serial.println("P10:  " + String(p10));
   }
 }
+float ReadBattery() {
+
+  int analogBat = analogRead(BatteryPin);//Se lee el valor analogico en el pin 12 
+  Serial.print(analogBat);
+  float digitalBat = (analogBat - 0) * (2.7 - 0) / (3100 - 0); //Como el voltaje esta dividido por un divisor solo leemos la mitad de los valores
+  float battery = digitalBat * 2; //Multiplicamos por 2 para obtener el valor real
+  Serial.print(" Bateria Real ");
+  Serial.print(battery);
+
+  return battery;
+}
+
+void SCD30(){ 
+  if (scd30.dataReady()){
+    Serial.println("Data available!");
+
+    if (!scd30.read()){ Serial.println("Error reading sensor data"); return; }
+
+    Serial.print("Temperature: ");
+    Serial.print(scd30.temperature);
+    Serial.println(" degrees C");
+    
+    Serial.print("Relative Humidity: ");
+    Serial.print(scd30.relative_humidity);
+    Serial.println(" %");
+    
+    Serial.print("CO2: ");
+    Serial.print(scd30.CO2, 3);
+    Serial.println(" ppm");
+    Serial.println("");
+  }
+}
+
 int count = 0;
 int count2 = 0;
 int t1;
@@ -322,11 +395,61 @@ int t2;
 
 /*-----------SETUP----------------------*/
 void setup() {
+
   my_sds.begin(TX_PIN, RX_PIN);
   Serial.begin(9600);
   pinMode(PowerPin, OUTPUT);
   digitalWrite(PowerPin, HIGH);
-  delay(1000);
+  delay(10000);
+
+  Serial.println("Calibrating MQ7");
+	mq7.calibrate();		// calculates R0
+	Serial.println("Calibration done!");
+
+   Serial.begin(9600); //Init serial port
+
+  //Set math model to calculate the PPM concentration and the value of constants
+  MQ135.setRegressionMethod(1); //_PPM =  a*ratio^b
+  MQ135.setA(110.47); MQ135.setB(-2.862); // Configure the equation to to calculate NH4 concentration
+
+  /*
+    Exponential regression:
+  GAS      | a      | b
+  CO       | 605.18 | -3.937  
+  Alcohol  | 77.255 | -3.18 
+  CO2      | 110.47 | -2.862
+  Toluen  | 44.947 | -3.445
+  NH4      | 102.2  | -2.473
+  Aceton  | 34.668 | -3.369
+  */
+  
+  MQ135.init(); 
+
+  Serial.print("Calibrating please wait.");
+  float calcR0 = 0;
+  for(int i = 1; i<=10; i ++)
+  {
+    MQ135.update(); // Update data, the arduino will read the voltage from the analog pin
+    calcR0 += MQ135.calibrate(RatioMQ135CleanAir);
+    Serial.print(".");
+  }
+  MQ135.setR0(calcR0/10);
+  Serial.println("  done!.");
+  
+  if(isinf(calcR0)) {Serial.println("Warning: Conection issue, R0 is infinite (Open circuit detected) please check your wiring and supply"); while(1);}
+  if(calcR0 == 0){Serial.println("Warning: Conection issue found, R0 is zero (Analog pin shorts to ground) please check your wiring and supply"); while(1);}
+  /*****************************  MQ CAlibration ********************************************/ 
+  MQ135.serialDebug(true);
+  //inicializacion SCD30 
+  if (!scd30.begin()) {
+    Serial.println("Failed to find SCD30 chip");
+    while (1) { delay(10); }
+  }
+  Serial.println("SCD30 Found!");
+
+  Serial.print("Measurement Interval: "); 
+  Serial.print(scd30.getMeasurementInterval()); 
+  Serial.println(" seconds");
 
   //Inicializacion del sensor BME280   
   unsigned status;     
@@ -343,22 +466,12 @@ void loop() {
 
   os_runloop_once();//Ejecucion del procesador del modulo LoRa
 
-  /*-------SONIDO (DE MOMENTO NO VA)-----------*/
-  /*int sensorValue = analogRead(KY038Pin);
-  Serial.println(sensorValue);
-  soundValue = sensorValue;
-  Serial.println(soundValue);
-  float decibelios = map(soundValue, 0, 4095, 30, 90);
-  Serial.print("KY038 SOUND: ");
-  Serial.print(decibelios);
-  Serial.println("DB");*/
-
+  
   int t2 = millis();//Se crea una variable del tiempo actual 
     
   if((t2-t1)>30000){ //Si ha pasado el tiempo de ejecucion de loop entramos en la funcion
 
       t1 = millis(); //Guardartel tiempo actual en T1
-      PMS();
       doSensor(txBuffer); // Llama a la función doSensor con txBuffer
       Serial.println("Sending"); // Agrega una nueva línea después de imprimir "Sending"
       do_send(); // Envía el paquete con la función do_send()
