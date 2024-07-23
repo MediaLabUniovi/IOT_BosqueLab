@@ -1,15 +1,5 @@
 /*-------------DECLARACION DE LIBRERIAS Y VARIABLES--------------------*/
 
-/*---SDS011--------*/
-
-#include "SDS011.h"
-int sensorData;
-float p10, p25;
-int error;
-SDS011 my_sds;
-#define RX_PIN 15
-#define TX_PIN 13
-
 /*-----MQ135--------*/
 
 #include <MQUnifiedsensor.h>
@@ -123,15 +113,6 @@ void doSensor(uint8_t txBuffer[]) {
   int shiftCO = int(CO*100);
   txBuffer[12] = byte(shiftCO);
   txBuffer[13] = shiftCO >> 8;
-
-  PMS();
-  int PM25 = p25*100;
-  txBuffer[14] = byte(PM25);
-  txBuffer[15] = PM25 >> 8;
-
-  int PM10 = p10*100;
-  txBuffer[16] = byte(PM10);
-  txBuffer[17] = PM10 >> 8;
   
   float bat = ReadBattery();
   int shiftbat = int(bat*100);
@@ -348,13 +329,7 @@ float COValue (){
 	delay(1000);
   return mq7.readPpm();
 }
-void PMS (){
-  error = my_sds.read(&p25, &p10);
-  if (!error) {
-    Serial.println("P2.5: " + String(p25));
-    Serial.println("P10:  " + String(p10));
-  }
-}
+
 float ReadBattery() {
 
   int analogBat = analogRead(BatteryPin);//Se lee el valor analogico en el pin 12 
