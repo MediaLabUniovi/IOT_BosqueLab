@@ -116,8 +116,8 @@ void doSensor(uint8_t txBuffer[]) {
   
   float bat = ReadBattery();
   int shiftbat = int(bat*100);
-  txBuffer[18] = byte(shiftbat);
-  txBuffer[19] = shiftbat >> 8;
+  txBuffer[14] = byte(shiftbat);
+  txBuffer[15] = shiftbat >> 8;
   
 }
 
