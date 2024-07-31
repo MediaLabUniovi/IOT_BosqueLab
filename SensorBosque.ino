@@ -334,8 +334,8 @@ float ReadBattery() {
 
   int analogBat = analogRead(BatteryPin);//Se lee el valor analogico en el pin 12 
   Serial.print(analogBat);
-  float digitalBat = (analogBat - 0) * (2.7 - 0) / (3100 - 0); //Como el voltaje esta dividido por un divisor solo leemos la mitad de los valores
-  float battery = digitalBat * 2; //Multiplicamos por 2 para obtener el valor real
+  float digitalBat = (analogBat - 0) * (2.7 - 0) / (3000 - 0); //Como el voltaje esta dividido por un divisor solo leemos la mitad de los valores
+  float battery = digitalBat * 1.57; //Multiplicamos por 2 para obtener el valor real
   Serial.print(" Bateria Real ");
   Serial.print(battery);
 
