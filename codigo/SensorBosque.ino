@@ -1,5 +1,15 @@
 /*-------------DECLARACION DE LIBRERIAS Y VARIABLES--------------------*/
 
+/*---SDS011--------*/
+
+#include "SDS011.h"
+int sensorData;
+float p10, p25;
+int error;
+SDS011 my_sds;
+#define RX_PIN 15
+#define TX_PIN 13
+
 /*-----MQ135--------*/
 
 #include <MQUnifiedsensor.h>
@@ -27,7 +37,7 @@ MQ7 mq7(A_PIN, VOLTAGE);
 #define PowerPin   2
 
 /*---------BATERIA------------------*/
-#define BatteryPin 14
+#define BatteryPin 12
 /*-------Librerias BME-------*/
 
 #include <Adafruit_Sensor.h>
@@ -45,7 +55,7 @@ Adafruit_SCD30  scd30;
 
 #include <lmic.h>
 #include <hal/hal.h>
-#define     TX_BUFFER_SIZE        21     //El paquete que se manda es de X bytes
+#define     TX_BUFFER_SIZE        23     //El paquete que se manda es de X bytes
 static uint8_t txBuffer[TX_BUFFER_SIZE]; 
 
 /*----------SLEEP--------------------*/
@@ -113,12 +123,27 @@ void doSensor(uint8_t txBuffer[]) {
   int shiftCO = int(CO*100);
   txBuffer[12] = byte(shiftCO);
   txBuffer[13] = shiftCO >> 8;
+
+  PMS();
+  int PM25 = p25*100;
+  txBuffer[14] = byte(PM25);
+  txBuffer[15] = PM25 >> 8;
+
+  int PM10 = p10*100;
+  txBuffer[16] = byte(PM10);
+  txBuffer[17] = PM10 >> 8;
   
   float bat = ReadBattery();
   int shiftbat = int(bat*100);
-  txBuffer[14] = byte(shiftbat);
-  txBuffer[15] = shiftbat >> 8;
+  txBuffer[18] = byte(shiftbat);
+  txBuffer[19] = shiftbat >> 8;
   
+  float CO2 = SCD30();
+  int shiftCO2 = int (CO2*10);
+  Serial.print(shiftCO2);
+  
+  txBuffer[20] = byte(shiftCO2);
+  txBuffer[21] = shiftCO2 >> 8;
 }
 
 void sleep_millis(uint64_t ms) {
@@ -329,24 +354,33 @@ float COValue (){
 	delay(1000);
   return mq7.readPpm();
 }
-
+void PMS (){
+  error = my_sds.read(&p25, &p10);
+  if (!error) {
+    Serial.println("P2.5: " + String(p25));
+    Serial.println("P10:  " + String(p10));
+  }
+}
 float ReadBattery() {
 
   int analogBat = analogRead(BatteryPin);//Se lee el valor analogico en el pin 12 
   Serial.print(analogBat);
   float digitalBat = (analogBat - 0) * (2.7 - 0) / (3000 - 0); //Como el voltaje esta dividido por un divisor solo leemos la mitad de los valores
-  float battery = digitalBat * 1.57; //Multiplicamos por 2 para obtener el valor real
+  float battery = digitalBat * 1.56; //Multiplicamos por 2 para obtener el valor real
   Serial.print(" Bateria Real ");
   Serial.print(battery);
 
   return battery;
 }
 
-void SCD30(){ 
+float SCD30(){ 
+
+  float CO_2;
+
   if (scd30.dataReady()){
     Serial.println("Data available!");
 
-    if (!scd30.read()){ Serial.println("Error reading sensor data"); return; }
+    if (!scd30.read()){ Serial.println("Error reading sensor data"); return 0; }
 
     Serial.print("Temperature: ");
     Serial.print(scd30.temperature);
@@ -356,11 +390,13 @@ void SCD30(){
     Serial.print(scd30.relative_humidity);
     Serial.println(" %");
     
+    CO_2 = scd30.CO2;
     Serial.print("CO2: ");
     Serial.print(scd30.CO2, 3);
     Serial.println(" ppm");
     Serial.println("");
   }
+  return CO_2;
 }
 
 int count = 0;
@@ -381,7 +417,7 @@ void setup() {
 	mq7.calibrate();		// calculates R0
 	Serial.println("Calibration done!");
 
-   Serial.begin(9600); //Init serial port
+  Serial.begin(9600); //Init serial port
 
   //Set math model to calculate the PPM concentration and the value of constants
   MQ135.setRegressionMethod(1); //_PPM =  a*ratio^b
@@ -411,12 +447,13 @@ void setup() {
   MQ135.setR0(calcR0/10);
   Serial.println("  done!.");
   
-  if(isinf(calcR0)) {Serial.println("Warning: Conection issue, R0 is infinite (Open circuit detected) please check your wiring and supply"); while(1);}
+  if(isinf(calcR0)) {Serial.println("Warning: Conection issue, R0 MQ135 is infinite (Open circuit detected) please check your wiring and supply"); while(1);}
   if(calcR0 == 0){Serial.println("Warning: Conection issue found, R0 is zero (Analog pin shorts to ground) please check your wiring and supply"); while(1);}
   /*****************************  MQ CAlibration ********************************************/ 
   MQ135.serialDebug(true);
-  //inicializacion SCD30 
-  if (!scd30.begin()) {
+
+ //inicializacion SCD30 
+ if (!scd30.begin()) {
     Serial.println("Failed to find SCD30 chip");
     while (1) { delay(10); }
   }
@@ -426,12 +463,21 @@ void setup() {
   Serial.print(scd30.getMeasurementInterval()); 
   Serial.println(" seconds");
 
+  if (!scd30.forceRecalibrationWithReference(400)){
+    Serial.println("Failed to force recalibration with reference");
+    while(1) { delay(10); }
+  }
+  Serial.print("Forced Recalibration reference: ");
+  Serial.print(scd30.getForcedCalibrationReference());
+  Serial.println(" ppm");
+
   //Inicializacion del sensor BME280   
   unsigned status;     
   status = bme.begin(0x76);
 
   os_init();          
   LMIC_reset();
+  delay(1000);
 
   t1 = millis();  
   count2 = count;
@@ -441,7 +487,6 @@ void loop() {
 
   os_runloop_once();//Ejecucion del procesador del modulo LoRa
 
-  
   int t2 = millis();//Se crea una variable del tiempo actual 
     
   if((t2-t1)>30000){ //Si ha pasado el tiempo de ejecucion de loop entramos en la funcion
