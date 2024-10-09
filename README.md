@@ -5,7 +5,10 @@ Objetivos de este proyecto:
 * Deteccion de contaminacion acustica: Sensor (Microfono) para medir decibelios [KY038]
 * Deteccion de temperatura y humedad [BME280]
 * Deteccion de particulas en suspension PM10 y PM2.5 [SDS011]
-  
+
+
+![jerarquico_imagen](https://github.com/user-attachments/assets/fd91d4c8-cebd-48fa-aa1f-6fc269b93277)
+<p align="center">_Figura 1: Esquema jerarquico del sistema_ </p>
 ![image4](https://github.com/user-attachments/assets/413d8f26-65e6-4c22-9c4f-37eb8ee13501)
 
   
