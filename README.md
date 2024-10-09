@@ -8,9 +8,9 @@ Objetivos de este proyecto:
 
 
 ![jerarquico_imagen](https://github.com/user-attachments/assets/fd91d4c8-cebd-48fa-aa1f-6fc269b93277)
-<p align="center">_Figura 1: Esquema jerarquico del sistema_ </p>
+_<p align="center">Figura 1: Esquema jerarquico del sistema </p>_
 ![image4](https://github.com/user-attachments/assets/413d8f26-65e6-4c22-9c4f-37eb8ee13501)
-
+_<p align="center">Figura 2: Dispositivo montado con gráficas de fondo </p>_
   
   
 Enlaces a los sensores que se usan en este proyecto se pueden encontrar en el EXCEL "SENSORES INCENDIOS"
