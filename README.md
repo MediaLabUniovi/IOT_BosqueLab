@@ -117,6 +117,6 @@ Configura board, flags de compilación y velocidad de monitor.
 El dise�o original de la placa tiene un error en la parte inferior (`BottomPCB.jpeg`).
 Es imprescindible rascar/cortar la pista marcada en negro en esa imagen antes de usar la PCB, para evitar el problema del ruteo original.
 
-## Cr�ditos
+## Créditos
 
-Proyecto original de Jota y Miguel, reciclado y mejorado por Jos�.
+Proyecto original de Jota y Miguel, reciclado y mejorado por José.
