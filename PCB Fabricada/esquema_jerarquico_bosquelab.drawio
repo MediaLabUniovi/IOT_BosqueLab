@@ -1,0 +1,130 @@
+<mxfile host="65bd71144e">
+    <diagram id="doi7Gct5xtO2u3UUpKmi" name="Page-1">
+        <mxGraphModel dx="1720" dy="530" grid="1" gridSize="1" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="1654" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="3" value="Portabaterías&amp;nbsp;&lt;br&gt;(Batería Litio 3.7V + &lt;br&gt;Circuito de salida (5V, 3.3V)" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="740" y="107" width="195" height="65" as="geometry"/>
+                </mxCell>
+                <mxCell id="29" style="edgeStyle=none;html=1;exitX=1;exitY=0.25;exitDx=0;exitDy=0;entryX=0.006;entryY=0.623;entryDx=0;entryDy=0;entryPerimeter=0;endArrow=none;endFill=0;" edge="1" parent="1" source="4" target="17">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="30" style="edgeStyle=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;endArrow=none;endFill=0;" edge="1" parent="1" source="5" target="17">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="31" style="edgeStyle=none;html=1;exitX=1;exitY=0;exitDx=0;exitDy=0;endArrow=none;endFill=0;" edge="1" parent="1" source="6" target="17">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="32" style="edgeStyle=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.403;entryY=1;entryDx=0;entryDy=0;entryPerimeter=0;endArrow=none;endFill=0;" edge="1" parent="1" source="7" target="17">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="33" style="edgeStyle=none;html=1;exitX=1;exitY=0.25;exitDx=0;exitDy=0;endArrow=none;endFill=0;" edge="1" parent="1" source="8" target="17">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="16" value="LILYGO (T3, V1.6.1)&lt;br&gt;(μC + LoRa + Display)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+                    <mxGeometry x="410" y="130" width="180" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="17" value="" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;" parent="1" vertex="1">
+                    <mxGeometry x="320" y="165" width="360" height="145" as="geometry"/>
+                </mxCell>
+                <mxCell id="18" value="SX1276&lt;br&gt;(Chip LoRa)" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="525" y="207.5" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="19" value="SSD1306&lt;br&gt;(Pantalla OLED)" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="360" y="207.5" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="28" style="edgeStyle=none;html=1;entryX=0.821;entryY=1.003;entryDx=0;entryDy=0;entryPerimeter=0;endArrow=none;endFill=0;exitX=0;exitY=0.72;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="22">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="615" y="535.57" as="sourcePoint"/>
+                        <mxPoint x="633.56" y="310.00499999999994" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="34" value="" style="group" vertex="1" connectable="0" parent="1">
+                    <mxGeometry x="755" y="230" width="180" height="92.5" as="geometry"/>
+                </mxCell>
+                <mxCell id="20" value="SDC30" style="rounded=0;whiteSpace=wrap;html=1;" parent="34" vertex="1">
+                    <mxGeometry x="30" y="32.5" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="21" value="Sensor de CO&lt;sub&gt;2&lt;/sub&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="34" vertex="1">
+                    <mxGeometry width="180" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="35" value="" style="group" vertex="1" connectable="0" parent="1">
+                    <mxGeometry x="775" y="350" width="140" height="105" as="geometry"/>
+                </mxCell>
+                <mxCell id="9" value="KY038" style="rounded=0;whiteSpace=wrap;html=1;" parent="35" vertex="1">
+                    <mxGeometry x="10" y="45" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="15" value="Sensor de Sonido con micrófono&lt;br&gt;(Contaminación Acústica)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="35" vertex="1">
+                    <mxGeometry width="140" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="36" value="" style="group" vertex="1" connectable="0" parent="1">
+                    <mxGeometry x="422.5" y="465" width="180" height="110" as="geometry"/>
+                </mxCell>
+                <mxCell id="8" value="SDS011" style="rounded=0;whiteSpace=wrap;html=1;" parent="36" vertex="1">
+                    <mxGeometry x="25" y="50" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="14" value="Sensor de partículas en suspensión&amp;nbsp;&lt;br&gt;(PPM 2.5 y PPM 10)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="36" vertex="1">
+                    <mxGeometry width="180" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="37" value="" style="group" vertex="1" connectable="0" parent="1">
+                    <mxGeometry x="292.5" y="470" width="130" height="105" as="geometry"/>
+                </mxCell>
+                <mxCell id="7" value="MQ7" style="rounded=0;whiteSpace=wrap;html=1;" parent="37" vertex="1">
+                    <mxGeometry x="5" y="45" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="13" value="Sensor de Monóxido de Carbono (CO)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="37" vertex="1">
+                    <mxGeometry width="130" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="38" value="" style="group" vertex="1" connectable="0" parent="1">
+                    <mxGeometry x="130" y="470" width="155" height="105" as="geometry"/>
+                </mxCell>
+                <mxCell id="6" value="MQ135" style="rounded=0;whiteSpace=wrap;html=1;" parent="38" vertex="1">
+                    <mxGeometry x="17.5" y="45" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="12" value="Sensor de NH&lt;sub&gt;3&lt;/sub&gt;, NO&lt;sub&gt;x&lt;/sub&gt;, Alcohol, Benceno, Humo, CO&lt;sub&gt;2&lt;/sub&gt;, etc." style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="38" vertex="1">
+                    <mxGeometry width="155" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="39" value="" style="group" vertex="1" connectable="0" parent="1">
+                    <mxGeometry x="120" y="350" width="130" height="105" as="geometry"/>
+                </mxCell>
+                <mxCell id="5" value="BME280" style="rounded=0;whiteSpace=wrap;html=1;" parent="39" vertex="1">
+                    <mxGeometry x="5" y="45" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="11" value="Sensor de Humedad Temperatura y Presión" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="39" vertex="1">
+                    <mxGeometry width="130" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="40" value="" style="group" vertex="1" connectable="0" parent="1">
+                    <mxGeometry x="95" y="210" width="180" height="112.5" as="geometry"/>
+                </mxCell>
+                <mxCell id="4" value="CCS811" style="rounded=0;whiteSpace=wrap;html=1;" parent="40" vertex="1">
+                    <mxGeometry x="30" y="52.5" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="10" value="Detecto de Compuestos Orgánicos Volátiles (VOC)&lt;br&gt;(ó CO&lt;sub&gt;2&lt;/sub&gt; equivalente)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="40" vertex="1">
+                    <mxGeometry width="180" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="41" style="edgeStyle=none;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.75;entryDx=0;entryDy=0;endArrow=none;endFill=0;" edge="1" parent="1" source="9" target="17">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="42" style="edgeStyle=none;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;endArrow=none;endFill=0;" edge="1" parent="1" source="20" target="17">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="47" style="edgeStyle=none;html=1;exitX=0.7;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;endArrow=none;endFill=0;" edge="1" parent="1" source="22" target="46">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="22" value="" style="verticalLabelPosition=bottom;shadow=0;dashed=0;align=center;html=1;verticalAlign=top;shape=mxgraph.electrical.mosfets1.n-channel_mosfet_1;" vertex="1" parent="1">
+                    <mxGeometry x="633" y="504.57" width="65" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="24" value="Encendido/Apagado de sensores" style="text;html=1;strokeColor=default;fillColor=default;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;dashed=1;" vertex="1" parent="1">
+                    <mxGeometry x="594" y="407.57" width="110" height="39" as="geometry"/>
+                </mxCell>
+                <mxCell id="46" value="" style="pointerEvents=1;verticalLabelPosition=bottom;shadow=0;dashed=0;align=center;html=1;verticalAlign=top;shape=mxgraph.electrical.signal_sources.signal_ground;strokeColor=default;fillColor=default;" vertex="1" parent="1">
+                    <mxGeometry x="656" y="605.57" width="45" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="48" value="V&lt;sub&gt;dd&lt;/sub&gt;" style="verticalLabelPosition=top;verticalAlign=bottom;shape=mxgraph.electrical.signal_sources.vdd;shadow=0;dashed=0;align=center;strokeWidth=1;fontSize=24;html=1;flipV=1;strokeColor=default;fillColor=default;" vertex="1" parent="1">
+                    <mxGeometry x="660" y="485" width="37" height="22" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
