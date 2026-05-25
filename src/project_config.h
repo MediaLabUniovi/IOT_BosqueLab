@@ -11,7 +11,7 @@
 #define SENSOR_KY038_ENABLED   0
 
 /*--------------------------SLEEP-------------------------*/
-#define WAKE_TIME_MS 10000
+#define WAKE_TIME_MS 300000
 
 /*----------------------CREDENCIALES TTN--------------------------*/
 static const u1_t PROGMEM APPEUI[8]  = {

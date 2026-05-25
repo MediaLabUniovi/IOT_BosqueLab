@@ -40,7 +40,7 @@ SDS011 my_sds;
 #define         Type                    ("MQ-135") //MQ3 or other MQ Sensor, if change this verify your a and b values.
 #define         Voltage_Resolution      (5) // 
 #define         ADC_Bit_Resolution      (12) // ESP-32 bit resolution. Source: https://randomnerdtutorials.com/esp32-adc-analog-read-arduino-ide/
-#define         RatioMQ135CleanAir       (3.6) // Ratio of your sensor, for this example an MQ-3
+#define         RatioMQ135CleanAir      (3.6) // Ratio of your sensor, for this example an MQ-3
 /*****************************Globals***********************************************/
 MQUnifiedsensor MQ135(Board, Voltage_Resolution, ADC_Bit_Resolution, Pin, Type);
 /*-------------------------MQ7------------------------*/
@@ -98,6 +98,7 @@ void printPayloadHex(const uint8_t* data, size_t len);
 void printLinkStatus(const char* tag);
 void printStatusBlock(const char* title);
 void printLastMeasurements();
+void recoverLoraIfStuck();
 // ---------------------------------------------------------------------------------
 
 int count = 0;
@@ -112,6 +113,9 @@ bool sds011Ready = false;
 bool ky038Ready = false;
 bool loraJoined = false;
 bool firstSendPending = false;
+RTC_DATA_ATTR bool rtcMqCalibrated = false;
+RTC_DATA_ATTR float rtcMq7R0 = 0.0f;
+RTC_DATA_ATTR float rtcMq135R0 = 0.0f;
 unsigned long txAttemptCounter = 0;
 unsigned long loraTransmitStartTime = 0;
 float lastTemp = 0.0f;
@@ -124,6 +128,10 @@ float lastPM25 = 0.0f;
 float lastPM10 = 0.0f;
 float lastBattery = 0.0f;
 float lastCO2 = 0.0f;
+unsigned long txrxPendSince = 0;
+unsigned long lastLoraRecoverMs = 0;
+const unsigned long LORA_TXRXPEND_TIMEOUT_MS = 180000UL;
+const unsigned long LORA_RECOVER_COOLDOWN_MS = 60000UL;
 
 static float sanitizeValue(float v) {
     if (isnan(v) || isinf(v)) {
@@ -134,6 +142,9 @@ static float sanitizeValue(float v) {
 
 /*--------------------------------SETUP----------------------------*/
 void setup() {
+    esp_sleep_wakeup_cause_t wakeCause = esp_sleep_get_wakeup_cause();
+    bool wokeFromDeepSleep = (wakeCause == ESP_SLEEP_WAKEUP_TIMER);
+
     #if SENSOR_SDS011_ENABLED
     my_sds.begin(TX_PIN, RX_PIN);
     sds011Ready = true;
@@ -149,10 +160,23 @@ void setup() {
     delay(10000);
 
     #if SENSOR_MQ7_ENABLED
-    Serial.println("[SENSORES] Calibrando MQ7...");
-    mq7.calibrate();		// calculates R0
-    Serial.println("[SENSORES] MQ7 OK");
-    mq7Ready = true;
+    if (wokeFromDeepSleep && rtcMqCalibrated && rtcMq7R0 > 0.0f) {
+        mq7.setR0(rtcMq7R0);
+        Serial.println("[SENSORES] MQ7 usando R0 cacheado (RTC)");
+        mq7Ready = true;
+    } else {
+        Serial.println("[SENSORES] Calibrando MQ7...");
+        mq7.calibrate();		// calculates R0
+        rtcMq7R0 = mq7.getR0();
+        Serial.print("[SENSORES] MQ7 R0=");
+        Serial.println(rtcMq7R0, 6);
+        mq7Ready = (rtcMq7R0 > 0.0f && !isnan(rtcMq7R0) && !isinf(rtcMq7R0));
+        if (mq7Ready) {
+            Serial.println("[SENSORES] MQ7 OK");
+        } else {
+            Serial.println("[SENSORES] MQ7 calibration invalida");
+        }
+    }
     #else
     pinMode(A_PIN, INPUT_PULLDOWN);
     mq7Ready = false;
@@ -178,15 +202,22 @@ void setup() {
     
     MQ135.init(); 
 
-    Serial.print("[SENSORES] Calibrando MQ135");
     float calcR0 = 0;
-    for(int i = 1; i<=10; i ++){
-        MQ135.update(); // Update data, the arduino will read the voltage from the analog pin
-        calcR0 += MQ135.calibrate(RatioMQ135CleanAir);
-        Serial.print(".");
+    if (wokeFromDeepSleep && rtcMqCalibrated && rtcMq135R0 > 0.0f) {
+        MQ135.setR0(rtcMq135R0);
+        calcR0 = rtcMq135R0 * 10.0f;
+        Serial.println("[SENSORES] MQ135 usando R0 cacheado (RTC)");
+    } else {
+        Serial.print("[SENSORES] Calibrando MQ135");
+        for(int i = 1; i<=10; i ++){
+            MQ135.update(); // Update data, the arduino will read the voltage from the analog pin
+            calcR0 += MQ135.calibrate(RatioMQ135CleanAir);
+            Serial.print(".");
+        }
+        MQ135.setR0(calcR0/10);
+        rtcMq135R0 = calcR0/10;
+        Serial.println(" OK");
     }
-    MQ135.setR0(calcR0/10);
-    Serial.println(" OK");
     
     if(isinf(calcR0)){
         Serial.println("Warning: Conection issue, R0 MQ135 is infinite (Open circuit detected) please check your wiring and supply");
@@ -204,6 +235,9 @@ void setup() {
     }
     if(!isinf(calcR0) && calcR0 != 0){
         mq135Ready = true;
+    }
+    if (mq7Ready && mq135Ready) {
+        rtcMqCalibrated = true;
     }
     /*****************************  MQ CAlibration ********************************************/ 
     MQ135.serialDebug(false);
@@ -268,7 +302,6 @@ void setup() {
     printDebugProbeResults();
     printSensorTable(true);
     #else
-    esp_sleep_wakeup_cause_t wakeCause = esp_sleep_get_wakeup_cause();
     Serial.println();
     printStatusBlock("INICIO");
     Serial.print("[SISTEMA] Wakeup cause: ");
@@ -298,6 +331,7 @@ void loop() {
     #endif
 
     os_runloop_once();//Ejecucion del procesador del modulo LoRa
+    recoverLoraIfStuck();
 
     if (firstSendPending && !(LMIC.opmode & OP_TXRXPEND)) {
         firstSendPending = false;
@@ -332,6 +366,46 @@ void loop() {
         }
         do_send(); // En OTAA, el primer uplink dispara el proceso de join automáticamente
     }
+}
+
+void recoverLoraIfStuck() {
+    bool txrxPend = (LMIC.opmode & OP_TXRXPEND);
+    unsigned long now = millis();
+
+    if (!txrxPend) {
+        txrxPendSince = 0;
+        return;
+    }
+
+    if (txrxPendSince == 0) {
+        txrxPendSince = now;
+        return;
+    }
+
+    unsigned long stuckTime = now - txrxPendSince;
+    if (stuckTime < LORA_TXRXPEND_TIMEOUT_MS) {
+        return;
+    }
+
+    if ((now - lastLoraRecoverMs) < LORA_RECOVER_COOLDOWN_MS) {
+        return;
+    }
+
+    printStatusBlock("LORA ATASCADO");
+    Serial.print("[LORA] OP_TXRXPEND activo durante ");
+    Serial.print(stuckTime / 1000UL);
+    Serial.println("s. Reiniciando stack LoRa...");
+
+    LMIC_reset();
+    LMIC_setLinkCheckMode(0);
+    LMIC_setClockError(MAX_CLOCK_ERROR * 1 / 100);
+    loraJoined = false;
+    firstSendPending = true;
+    loraTransmitStartTime = 0;
+    txrxPendSince = 0;
+    lastLoraRecoverMs = now;
+
+    Serial.println("[LORA] Stack reiniciado. Se intentara JOIN/envio de nuevo.");
 }
 
 //----------------------------------------------------------------------------------------------------

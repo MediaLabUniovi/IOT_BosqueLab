@@ -72,6 +72,7 @@ public:
 	float readRs();
 	float readRsRL();	// Rs / RL
 	void calibrate();
+	void setR0(float r0);
 
 	float getR0();
 

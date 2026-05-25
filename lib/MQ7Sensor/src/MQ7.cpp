@@ -43,6 +43,9 @@ void MQ7::calibrate() {
 	#endif		// end
 }
 
+void MQ7::setR0(float r0) {
+	R0 = r0;
+}
 
 float MQ7::getR0() {
 	return R0;
